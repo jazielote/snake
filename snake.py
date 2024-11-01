@@ -2,11 +2,14 @@ import pygame  # pip install pygame
 from pygame.math import Vector2
 import random
 
-# Definir dimensiones de la pantalla
+# Inicializar Pygame
+pygame.init()
+
+# Definir las dimensiones de la pantalla
 ANCHO = 720
 ALTO = 480
 
-# Crear la pantalla del juego
+# Crear la ventana del juego
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 
 # Definir la clase Snake (Serpiente)
@@ -17,7 +20,7 @@ class Snake():
         # Dirección inicial de la serpiente
         self.direccion = Vector2(10, 0)
         # Bandera para indicar si se debe agregar un segmento al cuerpo
-        self.add = True
+        self.add = False
 
     def draw(self):
         # Dibujar cada segmento del cuerpo de la serpiente en la pantalla
@@ -38,7 +41,7 @@ class Snake():
 
     def morir(self):
         # Verificar si la serpiente ha chocado con los límites de la pantalla
-        if self.body[0].x >= ANCHO or self.body[0].x < 0 or self.body[0].y >= ALTO or self.body[0].y < 0:
+        if self.body[0].x >= ANCHO + 10 or self.body[0].x <= -10 or self.body[0].y >= ALTO + 10 or self.body[0].y <= -10:
             return True
         # Verificar si la serpiente ha chocado con su propio cuerpo
         for i in self.body[1:]:
@@ -62,20 +65,19 @@ class Manzana():
 
     def comprobar(self, snake):
         # Verificar si la serpiente ha comido la manzana
-        if self.ubicacion == snake.body[0]:
-            self.generar()  # Generar una nueva manzana en una posición aleatoria
+        if snake.body[0] == self.ubicacion:
             snake.add = True  # Indicar que se debe agregar un nuevo segmento al cuerpo de la serpiente
+            self.generar()  # Generar una nueva manzana en una posición aleatoria
 
 # Función principal del juego
 def main():
-    # Inicializar la serpiente y la manzana
-    snake = Snake()
-    manzana = Manzana()
-    clock = pygame.time.Clock()
-    puntaje = 0
+    snake = Snake()  # Inicializar la serpiente
+    clock = pygame.time.Clock()  # Crear un reloj para controlar la velocidad del juego
+    manzana = Manzana()  # Inicializar la manzana
+    puntaje = 0  # Inicializar el puntaje
 
     while True:
-        clock.tick(30)  # Controlar la velocidad del juego (FPS)
+        clock.tick(30)  # Controlar la velocidad del juego (30 FPS)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -83,10 +85,10 @@ def main():
             
             if event.type == pygame.KEYDOWN:
                 # Cambiar la dirección de la serpiente basado en la tecla presionada
-                if event.key == pygame.K_DOWN and snake.direccion != Vector2(0, -10):
-                    snake.direccion = Vector2(0, 10)
-                elif event.key == pygame.K_UP and snake.direccion != Vector2(0, 10):
+                if event.key == pygame.K_UP and snake.direccion != Vector2(0, 10):
                     snake.direccion = Vector2(0, -10)
+                elif event.key == pygame.K_DOWN and snake.direccion != Vector2(0, -10):
+                    snake.direccion = Vector2(0, 10)
                 elif event.key == pygame.K_RIGHT and snake.direccion != Vector2(-10, 0):
                     snake.direccion = Vector2(10, 0)
                 elif event.key == pygame.K_LEFT and snake.direccion != Vector2(10, 0):
@@ -97,15 +99,14 @@ def main():
         
         pantalla.fill((0, 0, 0))  # Limpiar la pantalla
         
-        snake.draw()  # Dibujar la serpiente
-        manzana.draw()  # Dibujar la manzana
-        snake.move()  # Mover la serpiente
         manzana.comprobar(snake)  # Comprobar si la serpiente ha comido la manzana
-
+        snake.move()  # Mover la serpiente
         if snake.add:
             puntaje += 1  # Incrementar el puntaje si se ha agregado un nuevo segmento al cuerpo
         
-        pygame.display.set_caption(f"Puntaje: {puntaje}")  # Mostrar el puntaje en el título de la ventana
+        snake.draw()  # Dibujar la serpiente
+        manzana.draw()  # Dibujar la manzana
+        pygame.display.set_caption(f"Puntaje {puntaje}")  # Mostrar el puntaje en el título de la ventana
         pygame.display.update()  # Actualizar la pantalla
 
 # Iniciar el juego
